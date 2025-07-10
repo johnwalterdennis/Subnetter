@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
 from ipaddress import ip_network, IPv4Network, IPv4Address
-from typing import Tuple, Optional, List
+from typing import Optional, List
 
 _LADDER = [24, 25, 26, 27, 28, 29, 30, 30]
 
@@ -119,8 +119,8 @@ def ladder_subnets(start:IPv4Address, end:IPv4Address) -> List[IPv4Network]:
 
 
 if __name__ == "__main__":
-    office = "10.35.64.0/18"
-    plan = subnetter(office, floors=3, av=False, bms=False)
+    office = "10.58.64.0/19"
+    plan = subnetter(office, floors=2, av=False, bms=False)
     print(f"Sub-nets carved from {office}: ")
     print(f"Network Devices : {plan.network_devices.with_prefixlen}")
     print(f"Servers  : {plan.servers.with_prefixlen}")

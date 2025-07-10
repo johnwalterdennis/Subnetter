@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subnet Planner</title>
+</head>
+<h1>Subnet Planner</h1>
+
+<body>
+    <form id="form">
+        Parent CIDR: <input id="cidr" value="10.35.0.0/18"><br>
+        Floors: <input id="floors" type="number" value="2"><br>
+        <label><input id="av" type="checkbox">Audio and Visual /24 VLAN present</label><br>
+        <label><input id="bms" type="checkbox">Building and Management Systems /24 VLAN present</label><br>
+        <button type="submit">Generate Plan</button>
+    </form>
+    <pre id="out"></pre>
+</body>
+<script>
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        const body = {
+            cidr: cidr.value,
+            floors: +floors.value,
+            av: av.checked,
+            bms: bms.checked
+        };
+        const r = await fetch("/plan", {
+            method: "POST",
+            headers: { "Content-type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await r.json();
+        out.textContent = JSON.stringify(data, null, 2)
+    };
+</script>
+
+</html>
