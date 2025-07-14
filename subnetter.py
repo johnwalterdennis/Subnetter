@@ -73,10 +73,11 @@ def subnetter(
             FloorSubnets(wired=child_pool[i], wireless=child_pool[i+1])
         )
 
-    leftover = child_pool[needed_22s:]
-    tail_size = 512
-    gap_end   = parent.broadcast_address
-    gap_start = gap_end - (tail_size - 1)
+    leftover = []
+    all_allocated = reserved_24s+child_pool[:needed_22s]
+    last_net=max(all_allocated, key = lambda n: int(n.broadcast_address))
+    gap_start   = last_net.broadcast_address+1
+    gap_end = parent.broadcast_address
     ladder: List[IPv4Network] = []
 
     if gap_start <= gap_end:
@@ -98,12 +99,12 @@ def subnetter(
     )
 
 def ladder_subnets(start:IPv4Address, end:IPv4Address) -> List[IPv4Network]:
-    needed_hosts= 512
-    if int(end) - int(start) + 1 != needed_hosts:
-        raise ValueError(
-            f"pattern needs exactly {needed_hosts} addresses"
-            f"availiable addresses are {int(end)-int(start)+1}"
-        )
+    # needed_hosts= 512
+    # if int(end) - int(start) + 1 != needed_hosts:
+    #     raise ValueError(
+    #         f"pattern needs exactly {needed_hosts} addresses"
+    #         f"availiable addresses are {int(end)-int(start)+1}"
+    #     )
     nets: List[IPv4Network] = []
     cur = start
     for p in _LADDER:
@@ -116,11 +117,11 @@ def ladder_subnets(start:IPv4Address, end:IPv4Address) -> List[IPv4Network]:
         cur = net.broadcast_address+1
     return nets
 
-
+#does not subnet ladder accurately
 
 if __name__ == "__main__":
-    office = "10.58.64.0/19"
-    plan = subnetter(office, floors=2, av=False, bms=False)
+    office = "10.50.0.0/18"
+    plan = subnetter(office, floors=1, av=True, bms=True)
     print(f"Sub-nets carved from {office}: ")
     print(f"Network Devices : {plan.network_devices.with_prefixlen}")
     print(f"Servers  : {plan.servers.with_prefixlen}")
@@ -142,7 +143,7 @@ if __name__ == "__main__":
         print("ladder of unused smaller ranges:")
         for net in plan.ladder:
             print(f"{net.with_prefixlen}")
-        print(f"Radius : {plan.ladder[-1].with_prefixlen})")
+        print(f"Radius : {plan.ladder[-1].with_prefixlen}")
 
 
 

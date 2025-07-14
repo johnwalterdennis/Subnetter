@@ -19,6 +19,7 @@
     <pre id="out"></pre>
 </body>
 <script>
+    const API = "http://127.0.0.1:8000/plan";
     form.onsubmit = async (event) => {
         event.preventDefault();
         const body = {
@@ -27,7 +28,7 @@
             av: av.checked,
             bms: bms.checked
         };
-        const r = await fetch("/plan", {
+        const r = await fetch(API, {
             method: "POST",
             headers: { "Content-type": "application/json" },
             body: JSON.stringify(body)

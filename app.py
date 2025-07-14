@@ -6,9 +6,18 @@ from typing import List, Optional
 from subnetter import * 
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="Subnet Planner") 
 static_dir = Path(__file__).parent / "static"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:5501"],  # or ["*"] for dev wildcard
+    allow_methods=["POST"],                   # or ["*"]
+    allow_headers=["*"],
+)
 
 app.mount(
     "/static",                    
@@ -29,8 +38,9 @@ class SubnetResponse(BaseModel):
     av: Optional[str]
     bms: Optional[str]
     floors: List[List[str]]
+    Room_for_Growth: List[str]
     ladder: List[str]
-    leftover: List[str]
+    radius: str
 
 def net2str(net: Optional[IPv4Network]) -> Optional[str]:
     return None if net is None else net.with_prefixlen
@@ -43,7 +53,7 @@ def make_plan(req: SubnetRequest):
         raise HTTPException(status_code=400, detail=str(err)) 
     return SubnetResponse(
         network_devices=plan.network_devices.with_prefixlen,
-        servers=plan.network_devices.with_prefixlen,
+        servers=plan.servers.with_prefixlen,
         voice=plan.voice.with_prefixlen,
         security=plan.security.with_prefixlen,
         av=net2str(plan.av),
@@ -52,6 +62,7 @@ def make_plan(req: SubnetRequest):
             [f.wired.with_prefixlen, f.wireless.with_prefixlen]
             for f in plan.floor_pairs
         ],
-        leftover=[n.with_prefixlen for n in plan.leftover],
-        ladder= [n.with_prefixlen for n in plan.ladder]
+        Room_for_Growth=[n.with_prefixlen for n in plan.leftover],
+        ladder= [n.with_prefixlen for n in plan.ladder],
+        radius = plan.ladder[-1].with_prefixlen
     )
